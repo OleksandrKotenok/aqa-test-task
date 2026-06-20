@@ -8,10 +8,17 @@ import { test, expect } from '@playwright/test';
 // assert on that field instead of the HTTP status.
 const BASE_URL = 'https://automationexercise.com/api';
 
+// A browser-like User-Agent. Without it the site's bot protection sends the
+// request into a redirect loop when it runs from a CI / data-center IP.
+const headers = {
+  'User-Agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+};
+
 test.describe('Automation Exercise API', () => {
   // API-001 - positive case
   test('GET /productsList returns the products list', async ({ request }) => {
-    const response = await request.get(`${BASE_URL}/productsList`);
+    const response = await request.get(`${BASE_URL}/productsList`, { headers });
 
     // The HTTP transport itself is OK.
     expect(response.ok()).toBeTruthy();
@@ -31,6 +38,7 @@ test.describe('Automation Exercise API', () => {
   test('POST /verifyLogin without email returns a 400 error in the body', async ({ request }) => {
     // Send only the password, leaving out the required email parameter.
     const response = await request.post(`${BASE_URL}/verifyLogin`, {
+      headers,
       multipart: {
         password: 'Password123!',
       },
