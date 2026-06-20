@@ -19,6 +19,10 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
       options: --ipc=host
+    # GitHub points $HOME at /github/home (not owned by root), which makes
+    # Firefox refuse to launch. Point HOME at /root, which root owns.
+    env:
+      HOME: /root
 
     steps:
       - name: Checkout repository
