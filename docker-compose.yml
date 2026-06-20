@@ -1,0 +1,14 @@
+# Run the whole Playwright suite in a container:
+#
+#   docker compose up --build
+#
+# The HTML report and any failure artifacts are written back to the host
+# via the mounted volumes below.
+services:
+  playwright-tests:
+    build: .
+    # Allows running with more shared memory, which Chromium needs.
+    ipc: host
+    volumes:
+      - ./playwright-report:/app/playwright-report
+      - ./test-results:/app/test-results

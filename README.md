@@ -28,26 +28,60 @@ Local app URL: `http://localhost:5173`
 ## Run Tests
 
 ```bash
-npm run test:e2e
+npm run test:e2e            # run the full suite (UI + API, all profiles)
+npx playwright show-report  # open the HTML report after a run
 ```
 
-The e2e suite includes only a minimal starter check. Candidates are expected to
-add meaningful scenario coverage as part of the exercise.
-For manual testing, use the Vite dev server on `http://localhost:5173`. The
-Playwright starter check builds the app and runs against Vite preview on
-`http://127.0.0.1:4173` so CI tests the production bundle.
+The Playwright config builds the app and serves the production bundle with
+`vite preview` on `http://127.0.0.1:4173`, so the tests run against the same
+bundle that CI uses. For manual exploration, use the Vite dev server on
+`http://localhost:5173` (`npm run dev`).
 
 Useful scripts:
 
 ```bash
 npm run build
-npm run test:e2e:ui
+npm run test:e2e:ui                       # interactive UI mode
+npx playwright test --project=chromium-desktop   # one profile only
+npx playwright test --project=api                # API tests only
 ```
+
+### Test structure
+
+```
+tests/
+  helpers.ts                       # login helper, clean-start, error collector
+  e2e/
+    sign-in.spec.ts                # sign-in: positive, negative, validation, logout
+    projects.spec.ts               # navigation, seeded data, custom project creation
+  api/
+    automationexercise.spec.ts     # public API: 1 positive + 1 negative case
+```
+
+Browser/device coverage is defined in `playwright.config.ts`: Chromium, Firefox
+and WebKit on desktop, plus iPhone 14, Pixel 7 and Galaxy S9+ for mobile. API
+tests run in a separate browser-less `api` project.
+
+Test cases, possible bugs and a summary are documented in
+[`TEST_DOCUMENTATION.md`](./TEST_DOCUMENTATION.md).
 
 ## CI And Docker
 
-GitHub Actions and Docker support are intentionally left for the candidate task.
-See `TASK.md` for the expected CI and bonus Docker deliverables.
+- **`.github/workflows/playwright.yml`** - installs dependencies and browsers,
+  runs the suite, and uploads the HTML report as a build artifact.
+- **`.github/workflows/playwright-docker.yml`** - runs the suite inside the
+  official Playwright Docker container and publishes the HTML report to GitHub
+  Pages. (Enable Pages with "GitHub Actions" as the source in repository
+  Settings → Pages.)
+
+Run the tests in Docker locally:
+
+```bash
+docker compose up --build
+```
+
+The HTML report is written to `./playwright-report` on the host via a mounted
+volume.
 
 ## Fake Credentials
 

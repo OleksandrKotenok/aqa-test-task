@@ -1,0 +1,52 @@
+name: Playwright Tests (Docker) + Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# Permissions required to publish the report to GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    name: Run tests in Playwright container
+    runs-on: ubuntu-latest
+    # Run inside the official Playwright image (browsers preinstalled).
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      options: --ipc=host
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      # Always upload the report, even if the tests failed, so it can be published.
+      - name: Upload report as Pages artifact
+        if: ${{ !cancelled() }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report/
+
+  deploy:
+    name: Publish report to GitHub Pages
+    needs: test
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
