@@ -123,6 +123,6 @@ A listener (`collectPageErrors` in `tests/helpers.ts`) records `console` errors,
 
 ## Final Notes
 
-- **Main risks:** The app stores all state in `localStorage`; tests clear it before each run to stay deterministic. The Automation Exercise public API is external and can occasionally be slow or rate-limited.
+- **Main risks:** The app stores all state in `localStorage`; tests clear it before each run to stay deterministic. The Automation Exercise public API is external and can occasionally be slow or rate-limited. When called from inside the Playwright Docker container in CI, that API responds with an endless redirect to its homepage (bot protection / data-center networking), so the API tests run in the main `playwright.yml` workflow and via local `docker compose` (where they pass); the Docker CI workflow runs the browser suite only.
 - **Coverage gaps:** No tests for the Settings screen or the non-functional controls in BUG-001 (out of task scope). No accessibility or visual-regression checks.
 - **Recommended follow-ups:** Add per-field validation messages (BUG-002), wire up or hide the inert controls (BUG-001), and consider seeding state via `localStorage` injection to speed up project-creation setup.

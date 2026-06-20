@@ -31,8 +31,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Playwright tests
-        run: npx playwright test
+      # Run the browser (UI) suite in the container - that is what the
+      # Playwright image is for. The external Automation Exercise API
+      # redirect-loops when called from inside this container, so the API
+      # tests run in the main (non-container) "Playwright Tests" workflow
+      # and via `docker compose` locally instead.
+      - name: Run Playwright UI tests
+        run: npx playwright test tests/e2e
 
       # Always upload the report, even if the tests failed, so it can be published.
       - name: Upload report as Pages artifact
